@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,14 +17,15 @@ void main() {
       ),
     );
   });
-  testWidgets('Test new parser (hacky workaround to get BuildContext)', (WidgetTester tester) async {
+  testWidgets('Test new parser (hacky workaround to get BuildContext)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
           testNewParser(context);
 
           // The builder function must return a widget.
-          return Placeholder();
+          return const Placeholder();
         },
       ),
     );
@@ -33,8 +36,7 @@ void testNewParser(BuildContext context) {
   HtmlParser.parseHTML("<b>Hello, World!</b>");
 
   StyledElement tree = HtmlParser.lexDomTree(
-    HtmlParser.parseHTML(
-        "Hello! <b>Hello, World!</b><i>Hello, New World!</i>"),
+    HtmlParser.parseHTML("Hello! <b>Hello, World!</b><i>Hello, New World!</i>"),
     [],
     Html.tags,
     context,
@@ -49,14 +51,14 @@ void testNewParser(BuildContext context) {
       onImageError: null,
       shrinkWrap: false,
       selectable: true,
-      style: {},
+      style: const {},
       customRenders: generateDefaultRenders(),
       tagsList: Html.tags,
       selectionControls: null,
       scrollPhysics: null,
     ),
   );
-  print(tree.toString());
+  log(tree.toString());
 
   tree = HtmlParser.lexDomTree(
     HtmlParser.parseHTML(
@@ -75,14 +77,14 @@ void testNewParser(BuildContext context) {
       onImageError: null,
       shrinkWrap: false,
       selectable: true,
-      style: {},
+      style: const {},
       customRenders: generateDefaultRenders(),
       tagsList: Html.tags,
       selectionControls: null,
       scrollPhysics: null,
     ),
   );
-  print(tree.toString());
+  log(tree.toString());
 
   tree = HtmlParser.lexDomTree(
     HtmlParser.parseHTML("<img src='https://image.example.com' />"),
@@ -99,14 +101,14 @@ void testNewParser(BuildContext context) {
       onImageError: null,
       shrinkWrap: false,
       selectable: true,
-      style: {},
+      style: const {},
       customRenders: generateDefaultRenders(),
       tagsList: Html.tags,
       selectionControls: null,
       scrollPhysics: null,
     ),
   );
-  print(tree.toString());
+  log(tree.toString());
 
   tree = HtmlParser.lexDomTree(
     HtmlParser.parseHTML(
@@ -125,14 +127,14 @@ void testNewParser(BuildContext context) {
       onImageError: null,
       shrinkWrap: false,
       selectable: true,
-      style: {},
+      style: const {},
       customRenders: generateDefaultRenders(),
       tagsList: Html.tags,
       selectionControls: null,
       scrollPhysics: null,
     ),
   );
-  print(tree.toString());
+  log(tree.toString());
 
   /*ReplacedElement videoContentElement = parseReplacedElement(
     HtmlParser.parseHTML("""

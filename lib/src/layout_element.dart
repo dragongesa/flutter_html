@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/html_parser.dart';
-import 'package:flutter_html/src/anchor.dart';
-import 'package:flutter_html/src/css_box_widget.dart';
-import 'package:flutter_html/src/html_elements.dart';
-import 'package:flutter_html/src/styled_element.dart';
-import 'package:flutter_html/style.dart';
 import 'package:html/dom.dart' as dom;
+
+import '../html_parser.dart';
+import '../style.dart';
+import 'anchor.dart';
+import 'css_box_widget.dart';
+import 'html_elements.dart';
+import 'styled_element.dart';
 
 /// A [LayoutElement] is an element that breaks the normal Inline flow of
 /// an html document with a more complex layout. LayoutElements handle
@@ -29,7 +30,7 @@ class TableSectionLayoutElement extends LayoutElement {
   @override
   Widget toWidget(RenderContext context) {
     // Not rendered; TableLayoutElement will instead consume its children
-    return Container(child: Text("TABLE SECTION"));
+    return const Text("TABLE SECTION");
   }
 }
 
@@ -43,7 +44,7 @@ class TableRowLayoutElement extends LayoutElement {
   @override
   Widget toWidget(RenderContext context) {
     // Not rendered; TableLayoutElement will instead consume its children
-    return Container(child: Text("TABLE ROW"));
+    return const Text("TABLE ROW");
   }
 }
 
@@ -154,13 +155,13 @@ class DetailsContentElement extends LayoutElement {
         expandedAlignment: Alignment.centerLeft,
         title: elementList.isNotEmpty == true &&
                 elementList.first.localName == "summary"
-            ? CSSBoxWidget.withInlineSpanChildren(
+            ? CssBoxWidget.withInlineSpanChildren(
                 children: firstChild == null ? [] : [firstChild],
                 style: style,
               )
-            : Text("Details"),
+            : const Text("Details"),
         children: [
-          CSSBoxWidget.withInlineSpanChildren(
+          CssBoxWidget.withInlineSpanChildren(
             children: getChildren(
                 childrenList,
                 context,

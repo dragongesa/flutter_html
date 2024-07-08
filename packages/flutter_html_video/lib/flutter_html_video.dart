@@ -3,8 +3,8 @@ library flutter_html_video;
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:video_player/video_player.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:video_player/video_player.dart';
 
 typedef VideoControllerCallback = void Function(
     dom.Element?, ChewieController, VideoPlayerController);
@@ -53,7 +53,8 @@ class _VideoWidgetState extends State<VideoWidget> {
     if (sources.isNotEmpty && sources.first != null) {
       _width = givenWidth ?? (givenHeight ?? 150) * 2;
       _height = givenHeight ?? (givenWidth ?? 300) / 2;
-      _videoController = VideoPlayerController.network(sources.first!);
+      _videoController =
+          VideoPlayerController.networkUrl(Uri.parse(sources.first!));
       _chewieController = ChewieController(
         videoPlayerController: _videoController!,
         placeholder:

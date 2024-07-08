@@ -1,14 +1,13 @@
-import 'dart:ui';
-
 import 'package:collection/collection.dart';
-import 'package:csslib/visitor.dart' as css;
 import 'package:csslib/parser.dart' as cssparser;
+import 'package:csslib/visitor.dart' as css;
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/src/utils.dart';
+
+import '../flutter_html.dart';
+import 'utils.dart';
 
 Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
-  Style style = new Style();
+  Style style = Style();
   declarations.forEach((property, value) {
     if (value.isNotEmpty) {
       switch (property) {
@@ -27,11 +26,11 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
               (element.text != "thin" &&
                   element.text != "medium" &&
                   element.text != "thick" &&
-                  !(element is css.LengthTerm) &&
-                  !(element is css.PercentageTerm) &&
-                  !(element is css.EmTerm) &&
-                  !(element is css.RemTerm) &&
-                  !(element is css.NumberTerm)));
+                  element is! css.LengthTerm &&
+                  element is! css.PercentageTerm &&
+                  element is! css.EmTerm &&
+                  element is! css.RemTerm &&
+                  element is! css.NumberTerm));
           List<css.Expression?>? borderColors = value
               .where((element) =>
                   ExpressionMapping.expressionToColor(element) != null)
@@ -70,11 +69,11 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
               (element.text != "thin" &&
                   element.text != "medium" &&
                   element.text != "thick" &&
-                  !(element is css.LengthTerm) &&
-                  !(element is css.PercentageTerm) &&
-                  !(element is css.EmTerm) &&
-                  !(element is css.RemTerm) &&
-                  !(element is css.NumberTerm)));
+                  element is! css.LengthTerm &&
+                  element is! css.PercentageTerm &&
+                  element is! css.EmTerm &&
+                  element is! css.RemTerm &&
+                  element is! css.NumberTerm));
           css.LiteralTerm? borderWidth =
               borderWidths.firstWhereOrNull((element) => element != null);
           css.Expression? borderColor = value.firstWhereOrNull((element) =>
@@ -128,11 +127,11 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
               (element.text != "thin" &&
                   element.text != "medium" &&
                   element.text != "thick" &&
-                  !(element is css.LengthTerm) &&
-                  !(element is css.PercentageTerm) &&
-                  !(element is css.EmTerm) &&
-                  !(element is css.RemTerm) &&
-                  !(element is css.NumberTerm)));
+                  element is! css.LengthTerm &&
+                  element is! css.PercentageTerm &&
+                  element is! css.EmTerm &&
+                  element is! css.RemTerm &&
+                  element is! css.NumberTerm));
           css.LiteralTerm? borderWidth =
               borderWidths.firstWhereOrNull((element) => element != null);
           css.Expression? borderColor = value.firstWhereOrNull((element) =>
@@ -186,11 +185,11 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
               (element.text != "thin" &&
                   element.text != "medium" &&
                   element.text != "thick" &&
-                  !(element is css.LengthTerm) &&
-                  !(element is css.PercentageTerm) &&
-                  !(element is css.EmTerm) &&
-                  !(element is css.RemTerm) &&
-                  !(element is css.NumberTerm)));
+                  element is! css.LengthTerm &&
+                  element is! css.PercentageTerm &&
+                  element is! css.EmTerm &&
+                  element is! css.RemTerm &&
+                  element is! css.NumberTerm));
           css.LiteralTerm? borderWidth =
               borderWidths.firstWhereOrNull((element) => element != null);
           css.Expression? borderColor = value.firstWhereOrNull((element) =>
@@ -244,11 +243,11 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
               (element.text != "thin" &&
                   element.text != "medium" &&
                   element.text != "thick" &&
-                  !(element is css.LengthTerm) &&
-                  !(element is css.PercentageTerm) &&
-                  !(element is css.EmTerm) &&
-                  !(element is css.RemTerm) &&
-                  !(element is css.NumberTerm)));
+                  element is! css.LengthTerm &&
+                  element is! css.PercentageTerm &&
+                  element is! css.EmTerm &&
+                  element is! css.RemTerm &&
+                  element is! css.NumberTerm));
           css.LiteralTerm? borderWidth =
               borderWidths.firstWhereOrNull((element) => element != null);
           css.Expression? borderColor = value.firstWhereOrNull((element) =>
@@ -395,10 +394,10 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
 
           /// List<css.LiteralTerm> might include other values than the ones we want for margin length, so make sure to remove those before passing it to [ExpressionMapping]
           marginLengths.removeWhere((element) =>
-              !(element is css.LengthTerm) &&
-              !(element is css.EmTerm) &&
-              !(element is css.RemTerm) &&
-              !(element is css.NumberTerm) &&
+              element is! css.LengthTerm &&
+              element is! css.EmTerm &&
+              element is! css.RemTerm &&
+              element is! css.NumberTerm &&
               !(element.text == 'auto'));
           Margins margin = ExpressionMapping.expressionToMargins(marginLengths);
           style.margin = (style.margin ?? Margins.all(0)).copyWith(
@@ -430,10 +429,10 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
 
           /// List<css.LiteralTerm> might include other values than the ones we want for padding length, so make sure to remove those before passing it to [ExpressionMapping]
           paddingLengths.removeWhere((element) =>
-              !(element is css.LengthTerm) &&
-              !(element is css.EmTerm) &&
-              !(element is css.RemTerm) &&
-              !(element is css.NumberTerm));
+              element is! css.LengthTerm &&
+              element is! css.EmTerm &&
+              element is! css.RemTerm &&
+              element is! css.NumberTerm);
           List<double?> padding =
               ExpressionMapping.expressionToPadding(paddingLengths);
           style.padding = (style.padding ?? EdgeInsets.zero).copyWith(
@@ -494,14 +493,16 @@ Style declarationsToStyle(Map<String, List<css.Expression>> declarations) {
           style.textDecoration =
               ExpressionMapping.expressionToTextDecorationLine(
                   textDecorationList);
-          if (textDecorationColor != null)
+          if (textDecorationColor != null) {
             style.textDecorationColor =
                 ExpressionMapping.expressionToColor(textDecorationColor) ??
                     style.textDecorationColor;
-          if (textDecorationStyle != null)
+          }
+          if (textDecorationStyle != null) {
             style.textDecorationStyle =
                 ExpressionMapping.expressionToTextDecorationStyle(
                     textDecorationStyle);
+          }
           break;
         case 'text-decoration-color':
           style.textDecorationColor =
@@ -576,14 +577,14 @@ Map<String, Map<String, List<css.Expression>>> parseExternalCss(
 }
 
 class DeclarationVisitor extends css.Visitor {
-  Map<String, Map<String, List<css.Expression>>> _result = {};
-  Map<String, List<css.Expression>> _properties = {};
+  final Map<String, Map<String, List<css.Expression>>> _result = {};
+  final Map<String, List<css.Expression>> _properties = {};
   late String _selector;
   late String _currentProperty;
 
   Map<String, Map<String, List<css.Expression>>> getDeclarations(
       css.StyleSheet sheet) {
-    sheet.topLevels.forEach((element) {
+    for (var element in sheet.topLevels) {
       if (element.span != null) {
         _selector = element.span!.text;
         element.visit(this);
@@ -591,18 +592,18 @@ class DeclarationVisitor extends css.Visitor {
           _properties.forEach((key, value) {
             if (_result[_selector]![key] != null) {
               _result[_selector]![key]!
-                  .addAll(new List<css.Expression>.from(value));
+                  .addAll(List<css.Expression>.from(value));
             } else {
-              _result[_selector]![key] = new List<css.Expression>.from(value);
+              _result[_selector]![key] = List<css.Expression>.from(value);
             }
           });
         } else {
           _result[_selector] =
-              new Map<String, List<css.Expression>>.from(_properties);
+              Map<String, List<css.Expression>>.from(_properties);
         }
         _properties.clear();
       }
-    });
+    }
     return _result;
   }
 
@@ -732,7 +733,7 @@ class ExpressionMapping {
       return double.tryParse(value.text) ?? 1.0;
     } else if (value is css.LengthTerm) {
       return double.tryParse(
-              value.text.replaceAll(new RegExp(r'\s+(\d+\.\d+)\s+'), '')) ??
+              value.text.replaceAll(RegExp(r'\s+(\d+\.\d+)\s+'), '')) ??
           1.0;
     } else if (value is css.LiteralTerm) {
       switch (value.text) {
@@ -844,7 +845,7 @@ class ExpressionMapping {
       //   return FontSize.rem(double.tryParse(value.text) ?? 1, Unit.em);
     } else if (value is css.LengthTerm) {
       return FontSize(double.tryParse(
-              value.text.replaceAll(new RegExp(r'\s+(\d+\.\d+)\s+'), '')) ??
+              value.text.replaceAll(RegExp(r'\s+(\d+\.\d+)\s+'), '')) ??
           16);
     } else if (value is css.LiteralTerm) {
       switch (value.text) {
@@ -932,7 +933,7 @@ class ExpressionMapping {
     } else if (value is css.LengthTerm) {
       return LineHeight(
           double.tryParse(
-              value.text.replaceAll(new RegExp(r'\s+(\d+\.\d+)\s+'), '')),
+              value.text.replaceAll(RegExp(r'\s+(\d+\.\d+)\s+'), '')),
           units: "length");
     }
     return LineHeight.normal;
@@ -1067,7 +1068,7 @@ class ExpressionMapping {
       return double.tryParse(value.text);
     } else if (value is css.LengthTerm) {
       return double.tryParse(
-          value.text.replaceAll(new RegExp(r'\s+(\d+\.\d+)\s+'), ''));
+          value.text.replaceAll(RegExp(r'\s+(\d+\.\d+)\s+'), ''));
     }
     return null;
   }
@@ -1081,8 +1082,8 @@ class ExpressionMapping {
       //   return LengthOrPercent(double.parse(value.text), Unit.rem);
       // TODO there are several other available terms processed by the CSS parser
     } else if (value is css.LengthTerm) {
-      double number = double.parse(
-          value.text.replaceAll(new RegExp(r'\s+(\d+\.\d+)\s+'), ''));
+      double number =
+          double.parse(value.text.replaceAll(RegExp(r'\s+(\d+\.\d+)\s+'), ''));
       Unit unit = _unitMap(value.unit);
       return LengthOrPercent(number, unit);
     }
@@ -1139,8 +1140,9 @@ class ExpressionMapping {
         }
       }
     }
-    if (decorationList.contains(TextDecoration.none))
+    if (decorationList.contains(TextDecoration.none)) {
       decorationList = [TextDecoration.none];
+    }
     return TextDecoration.combine(decorationList);
   }
 
@@ -1181,7 +1183,7 @@ class ExpressionMapping {
       css.Expression? blurRadius;
       css.Expression? color;
       int expressionIndex = 0;
-      list.forEach((element) {
+      for (var element in list) {
         if (element is css.HexColorTerm || element is css.FunctionTerm) {
           color = element;
         } else if (expressionIndex == 0) {
@@ -1193,7 +1195,7 @@ class ExpressionMapping {
         } else {
           blurRadius = element;
         }
-      });
+      }
       RegExp nonNumberRegex = RegExp(r'\s+(\d+\.\d+)\s+');
       if (offsetX is css.LiteralTerm && offsetY is css.LiteralTerm) {
         if (color != null &&
@@ -1201,31 +1203,23 @@ class ExpressionMapping {
           shadow.add(Shadow(
             color: expressionToColor(color)!,
             offset: Offset(
-                double.tryParse((offsetX as css.LiteralTerm)
-                    .text
-                    .replaceAll(nonNumberRegex, ''))!,
-                double.tryParse((offsetY as css.LiteralTerm)
-                    .text
-                    .replaceAll(nonNumberRegex, ''))!),
+                double.tryParse((offsetX).text.replaceAll(nonNumberRegex, ''))!,
+                double.tryParse(
+                    (offsetY).text.replaceAll(nonNumberRegex, ''))!),
             blurRadius: (blurRadius is css.LiteralTerm)
-                ? double.tryParse((blurRadius as css.LiteralTerm)
-                    .text
-                    .replaceAll(nonNumberRegex, ''))!
+                ? double.tryParse(
+                    (blurRadius).text.replaceAll(nonNumberRegex, ''))!
                 : 0.0,
           ));
         } else {
           shadow.add(Shadow(
             offset: Offset(
-                double.tryParse((offsetX as css.LiteralTerm)
-                    .text
-                    .replaceAll(nonNumberRegex, ''))!,
-                double.tryParse((offsetY as css.LiteralTerm)
-                    .text
-                    .replaceAll(nonNumberRegex, ''))!),
+                double.tryParse((offsetX).text.replaceAll(nonNumberRegex, ''))!,
+                double.tryParse(
+                    (offsetY).text.replaceAll(nonNumberRegex, ''))!),
             blurRadius: (blurRadius is css.LiteralTerm)
-                ? double.tryParse((blurRadius as css.LiteralTerm)
-                    .text
-                    .replaceAll(nonNumberRegex, ''))!
+                ? double.tryParse(
+                    (blurRadius).text.replaceAll(nonNumberRegex, ''))!
                 : 0.0,
           ));
         }
@@ -1235,17 +1229,18 @@ class ExpressionMapping {
     return finalShadows;
   }
 
-  static Color stringToColor(String _text) {
-    var text = _text.replaceFirst('#', '');
-    if (text.length == 3)
+  static Color stringToColor(String param) {
+    var text = param.replaceFirst('#', '');
+    if (text.length == 3) {
       text = text.replaceAllMapped(RegExp(r"[a-f]|\d", caseSensitive: false),
           (match) => '${match.group(0)}${match.group(0)}');
-    if (text.length > 6) {
-      text = "0x" + text;
-    } else {
-      text = "0xFF" + text;
     }
-    return new Color(int.parse(text));
+    if (text.length > 6) {
+      text = "0x$text";
+    } else {
+      text = "0xFF$text";
+    }
+    return Color(int.parse(text));
   }
 
   static Color? rgbOrRgbaToColor(String text) {
@@ -1278,7 +1273,7 @@ class ExpressionMapping {
     final hslText = text.replaceAll(')', '').replaceAll(' ', '');
     final hslValues = hslText.split(',').toList();
     List<double?> parsedHsl = [];
-    hslValues.forEach((element) {
+    for (var element in hslValues) {
       if (element.contains("%") &&
           double.tryParse(element.replaceAll("%", "")) != null) {
         parsedHsl.add(double.tryParse(element.replaceAll("%", ""))! * 0.01);
@@ -1291,7 +1286,7 @@ class ExpressionMapping {
           parsedHsl.add(double.tryParse(element));
         }
       }
-    });
+    }
     if (parsedHsl.length == 4 && !parsedHsl.contains(null)) {
       return HSLColor.fromAHSL(
               parsedHsl.last!, parsedHsl.first!, parsedHsl[1]!, parsedHsl[2]!)
@@ -1310,7 +1305,8 @@ class ExpressionMapping {
         orElse: () => "");
     if (namedColor != "") {
       return stringToColor(namedColors[namedColor]!);
-    } else
+    } else {
       return null;
+    }
   }
 }

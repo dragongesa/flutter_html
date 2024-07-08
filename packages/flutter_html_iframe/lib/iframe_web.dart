@@ -1,12 +1,11 @@
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html_iframe/shims/dart_ui.dart' as ui;
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-
+import 'shims/dart_ui.dart' as ui;
 import 'package:webview_flutter/webview_flutter.dart';
 
 CustomRender iframeRender({NavigationDelegate? navigationDelegate}) =>
@@ -35,7 +34,7 @@ CustomRender iframeRender({NavigationDelegate? navigationDelegate}) =>
             (double.tryParse(context.tree.element?.attributes['width'] ?? "") ??
                     300) /
                 2,
-        child: CSSBoxWidget(
+        child: CssBoxWidget(
           style: context.style,
           childIsReplaced: true,
           child: Directionality(

@@ -2,9 +2,9 @@ library flutter_html_table;
 
 import 'dart:math';
 
-import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 
 /// The CustomRender function that will render the <table> HTML tag
 CustomRender tableRender() =>
@@ -116,7 +116,7 @@ Widget _layoutCells(RenderContext context, BoxConstraints constraints) {
               columnColspanOffset[columni].clamp(1, columnMax - columni - 1);
         }
         cells.add(GridPlacement(
-          child: CSSBoxWidget(
+          child: CssBoxWidget(
             style: child.style
                 .merge(row.style), //TODO padding/decoration(color/border)
             child: SizedBox.expand(
@@ -124,7 +124,7 @@ Widget _layoutCells(RenderContext context, BoxConstraints constraints) {
                 alignment: child.style.alignment ??
                     context.style.alignment ??
                     Alignment.centerLeft,
-                child: CSSBoxWidget.withInlineSpanChildren(
+                child: CssBoxWidget.withInlineSpanChildren(
                   children: [context.parser.parseTree(context, child)],
                   style: child.style, //TODO updated this. Does it work?
                 ),

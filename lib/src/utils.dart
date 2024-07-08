@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/style.dart';
+import '../style.dart';
 
 Map<String, String> namedColors = {
   "White": "#FFFFFF",

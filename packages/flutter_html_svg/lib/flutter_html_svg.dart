@@ -148,7 +148,7 @@ CustomRenderMatcher svgDataUriMatcher(
 
 /// A CustomRenderMatcher for an <img> tag with an svg tag over the network
 CustomRenderMatcher svgNetworkSourceMatcher({
-  List<String> schemas: const ["https", "http"],
+  List<String> schemas = const ["https", "http"],
   List<String>? domains,
   String? extension = "svg",
 }) =>

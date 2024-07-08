@@ -2,10 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_html/flutter_html.dart';
 
-class CSSBoxWidget extends StatelessWidget {
-  CSSBoxWidget({
+import '../flutter_html.dart';
+
+class CssBoxWidget extends StatelessWidget {
+  const CssBoxWidget({
     this.key,
     required this.child,
     required this.style,
@@ -14,8 +15,8 @@ class CSSBoxWidget extends StatelessWidget {
     this.shrinkWrap = false,
   }) : super(key: key);
 
-  /// Generates a CSSBoxWidget that contains a list of InlineSpan children.
-  CSSBoxWidget.withInlineSpanChildren({
+  /// Generates a CssBoxWidget that contains a list of InlineSpan children.
+  CssBoxWidget.withInlineSpanChildren({
     this.key,
     required List<InlineSpan> children,
     required this.style,
@@ -25,7 +26,7 @@ class CSSBoxWidget extends StatelessWidget {
     bool selectable = false,
     TextSelectionControls? selectionControls,
     ScrollPhysics? scrollPhysics,
-  })  : this.child = selectable
+  })  : child = selectable
             ? _generateSelectableWidgetChild(
                 children,
                 style,
@@ -36,6 +37,7 @@ class CSSBoxWidget extends StatelessWidget {
         super(key: key);
 
   /// An optional anchor key to use in finding this box
+  @override
   final AnchorKey? key;
 
   /// The child to be rendered within the CSS Box.
@@ -144,7 +146,7 @@ class CSSBoxWidget extends StatelessWidget {
 
     assert(
       textDirection != null,
-      "CSSBoxWidget needs either a Directionality ancestor or a provided textDirection",
+      "CssBoxWidget needs either a Directionality ancestor or a provided textDirection",
     );
 
     return textDirection!;
@@ -196,7 +198,7 @@ class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
   final double emValue;
 
   /// Whether or not this container should shrinkWrap its contents.
-  /// (see definition on [CSSBoxWidget])
+  /// (see definition on [CssBoxWidget])
   final bool shrinkWrap;
 
   @override
@@ -379,8 +381,9 @@ class _RenderCSSBox extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! CSSBoxParentData)
+    if (child.parentData is! CSSBoxParentData) {
       child.parentData = CSSBoxParentData();
+    }
   }
 
   static double getIntrinsicDimension(RenderBox? firstChild,
@@ -453,13 +456,13 @@ class _RenderCSSBox extends RenderBox
       maxWidth: (this.width.unit != Unit.auto)
           ? this.width.value
           : containingBlockSize.width -
-              (this.margins.left?.value ?? 0) -
-              (this.margins.right?.value ?? 0),
+              (margins.left?.value ?? 0) -
+              (margins.right?.value ?? 0),
       maxHeight: (this.height.unit != Unit.auto)
           ? this.height.value
           : containingBlockSize.height -
-              (this.margins.top?.value ?? 0) -
-              (this.margins.bottom?.value ?? 0),
+              (margins.top?.value ?? 0) -
+              (margins.bottom?.value ?? 0),
       minWidth: (this.width.unit != Unit.auto) ? this.width.value : 0,
       minHeight: (this.height.unit != Unit.auto) ? this.height.value : 0,
     );
@@ -673,23 +676,19 @@ class _RenderCSSBox extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     defaultPaint(context, offset);
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
 
 extension Normalize on Dimension {
   void normalize(double emValue) {
-    switch (this.unit) {
+    switch (unit) {
       case Unit.em:
-        this.value *= emValue;
-        this.unit = Unit.px;
+        value *= emValue;
+        unit = Unit.px;
         return;
       case Unit.px:
       case Unit.auto:
       case Unit.percent:
+      case Unit.rem:
         return;
     }
   }

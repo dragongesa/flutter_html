@@ -1,15 +1,14 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/src/css_parser.dart';
 
+import 'flutter_html.dart';
+import 'src/css_parser.dart';
+
+export 'package:flutter_html/src/style/fontsize.dart';
+export 'package:flutter_html/src/style/length.dart';
+export 'package:flutter_html/src/style/lineheight.dart';
 //Export Style value-unit APIs
 export 'package:flutter_html/src/style/margin.dart';
-export 'package:flutter_html/src/style/length.dart';
 export 'package:flutter_html/src/style/size.dart';
-export 'package:flutter_html/src/style/fontsize.dart';
-export 'package:flutter_html/src/style/lineheight.dart';
 
 ///This class represents all the available CSS attributes
 ///for this package.
@@ -243,20 +242,20 @@ class Style {
     this.textOverflow,
     this.textTransform = TextTransform.none,
   }) {
-    if (this.alignment == null &&
+    if (alignment == null &&
         (display == Display.BLOCK || display == Display.LIST_ITEM)) {
-      this.alignment = Alignment.centerLeft;
+      alignment = Alignment.centerLeft;
     }
   }
 
   static Map<String, Style> fromThemeData(ThemeData theme) => {
-        'h1': Style.fromTextStyle(theme.textTheme.headline1!),
-        'h2': Style.fromTextStyle(theme.textTheme.headline2!),
-        'h3': Style.fromTextStyle(theme.textTheme.headline3!),
-        'h4': Style.fromTextStyle(theme.textTheme.headline4!),
-        'h5': Style.fromTextStyle(theme.textTheme.headline5!),
-        'h6': Style.fromTextStyle(theme.textTheme.headline6!),
-        'body': Style.fromTextStyle(theme.textTheme.bodyText2!),
+        'h1': Style(fontSize: FontSize(32.0), fontWeight: FontWeight.bold),
+        'h2': Style(fontSize: FontSize(24.0), fontWeight: FontWeight.bold),
+        'h3': Style(fontSize: FontSize(20.8), fontWeight: FontWeight.bold),
+        'h4': Style(fontSize: FontSize(18.72), fontWeight: FontWeight.bold),
+        'h5': Style(fontSize: FontSize(16.64), fontWeight: FontWeight.bold),
+        'h6': Style(fontSize: FontSize(14.4), fontWeight: FontWeight.bold),
+        'body': Style(fontSize: FontSize(14.0), fontWeight: FontWeight.normal),
       };
 
   static Map<String, Style> fromCss(
@@ -462,24 +461,24 @@ class Style {
   }
 
   Style.fromTextStyle(TextStyle textStyle) {
-    this.backgroundColor = textStyle.backgroundColor;
-    this.color = textStyle.color;
-    this.textDecoration = textStyle.decoration;
-    this.textDecorationColor = textStyle.decorationColor;
-    this.textDecorationStyle = textStyle.decorationStyle;
-    this.textDecorationThickness = textStyle.decorationThickness;
-    this.fontFamily = textStyle.fontFamily;
-    this.fontFamilyFallback = textStyle.fontFamilyFallback;
-    this.fontFeatureSettings = textStyle.fontFeatures;
-    this.fontSize =
+    backgroundColor = textStyle.backgroundColor;
+    color = textStyle.color;
+    textDecoration = textStyle.decoration;
+    textDecorationColor = textStyle.decorationColor;
+    textDecorationStyle = textStyle.decorationStyle;
+    textDecorationThickness = textStyle.decorationThickness;
+    fontFamily = textStyle.fontFamily;
+    fontFamilyFallback = textStyle.fontFamilyFallback;
+    fontFeatureSettings = textStyle.fontFeatures;
+    fontSize =
         textStyle.fontSize != null ? FontSize(textStyle.fontSize!) : null;
-    this.fontStyle = textStyle.fontStyle;
-    this.fontWeight = textStyle.fontWeight;
-    this.letterSpacing = textStyle.letterSpacing;
-    this.textShadow = textStyle.shadows;
-    this.wordSpacing = textStyle.wordSpacing;
-    this.lineHeight = LineHeight(textStyle.height ?? 1.2);
-    this.textTransform = TextTransform.none;
+    fontStyle = textStyle.fontStyle;
+    fontWeight = textStyle.fontWeight;
+    letterSpacing = textStyle.letterSpacing;
+    textShadow = textStyle.shadows;
+    wordSpacing = textStyle.wordSpacing;
+    lineHeight = LineHeight(textStyle.height ?? 1.2);
+    textTransform = TextTransform.none;
   }
 
   /// Sets any dimensions set to rem or em to the computed size

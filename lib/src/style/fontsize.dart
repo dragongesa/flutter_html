@@ -35,5 +35,5 @@ class FontSize extends LengthOrPercent {
     return parent;
   }
 
-  double get emValue => this.value;
+  double get emValue => value;
 }

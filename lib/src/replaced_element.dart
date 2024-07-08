@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_html/html_parser.dart';
-import 'package:flutter_html/src/anchor.dart';
-import 'package:flutter_html/src/css_box_widget.dart';
-import 'package:flutter_html/src/html_elements.dart';
-import 'package:flutter_html/style.dart';
+import '../html_parser.dart';
+import 'anchor.dart';
+import 'css_box_widget.dart';
+import 'html_elements.dart';
+import '../style.dart';
 import 'package:html/dom.dart' as dom;
 
 /// A [ReplacedElement] is a type of [StyledElement] that does not require its [children] to be rendered.
@@ -71,6 +71,7 @@ class EmptyContentElement extends ReplacedElement {
 }
 
 class RubyElement extends ReplacedElement {
+  @override
   dom.Element element;
 
   RubyElement({
@@ -97,12 +98,12 @@ class RubyElement extends ReplacedElement {
           (element.text ?? "").trim().isEmpty &&
           index > 0 &&
           index + 1 < context.tree.children.length &&
-          !(context.tree.children[index - 1] is TextContentElement) &&
-          !(context.tree.children[index + 1] is TextContentElement))) {
+          context.tree.children[index - 1] is! TextContentElement &&
+          context.tree.children[index + 1] is! TextContentElement)) {
         children.add(element);
       }
     });
-    children.forEach((c) {
+    for (var c in children) {
       if (c.name == "rt" && node != null) {
         final widget = Stack(
           alignment: Alignment.center,
@@ -112,7 +113,7 @@ class RubyElement extends ReplacedElement {
               child: Center(
                 child: Transform(
                   transform: Matrix4.translationValues(0, -(rubyYPos), 0),
-                  child: CSSBoxWidget(
+                  child: CssBoxWidget(
                     style: c.style,
                     //TODO do any other attributes apply?
                     child: Text(
@@ -125,15 +126,15 @@ class RubyElement extends ReplacedElement {
                 ),
               ),
             ),
-            CSSBoxWidget(
+            CssBoxWidget(
               //TODO do any other styles apply? Does ruby still work?
               style: context.style,
               child: node is TextContentElement
                   ? Text(
-                      (node as TextContentElement).text?.trim() ?? "",
+                      (node).text?.trim() ?? "",
                       style: context.style.generateTextStyle(),
                     )
-                  : RichText(text: context.parser.parseTree(context, node!)),
+                  : RichText(text: context.parser.parseTree(context, node)),
             ),
           ],
         );
@@ -141,7 +142,7 @@ class RubyElement extends ReplacedElement {
       } else {
         node = c;
       }
-    });
+    }
     return Padding(
       padding: EdgeInsets.only(top: rubySize),
       child: Wrap(

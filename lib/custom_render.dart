@@ -1,13 +1,13 @@
-import 'package:collection/collection.dart';
-
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/src/html_elements.dart';
-import 'package:flutter_html/src/utils.dart';
+
+import 'flutter_html.dart';
+import 'src/html_elements.dart';
+import 'src/utils.dart';
 
 typedef CustomRenderMatcher = bool Function(RenderContext context);
 
@@ -44,7 +44,7 @@ CustomRenderMatcher dataUriMatcher(
     };
 
 CustomRenderMatcher networkSourceMatcher({
-  List<String> schemas: const ["https", "http"],
+  List<String> schemas = const ["https", "http"],
   List<String>? domains,
   String? extension,
 }) =>
@@ -123,7 +123,7 @@ CustomRender blockElementRender({Style? style, List<InlineSpan>? children}) =>
                             childTree.style.display == Display.BLOCK &&
                             childTree.element?.localName != "html" &&
                             childTree.element?.localName != "body")
-                          TextSpan(text: "\n"),
+                          const TextSpan(text: "\n"),
                       ])
                   .toList(),
         );
@@ -131,7 +131,7 @@ CustomRender blockElementRender({Style? style, List<InlineSpan>? children}) =>
       return WidgetSpan(
         alignment: PlaceholderAlignment.baseline,
         baseline: TextBaseline.alphabetic,
-        child: CSSBoxWidget.withInlineSpanChildren(
+        child: CssBoxWidget.withInlineSpanChildren(
           key: context.key,
           style: style ?? context.tree.style,
           shrinkWrap: context.parser.shrinkWrap,
@@ -146,7 +146,7 @@ CustomRender blockElementRender({Style? style, List<InlineSpan>? children}) =>
                             childTree.style.display == Display.BLOCK &&
                             childTree.element?.localName != "html" &&
                             childTree.element?.localName != "body")
-                          TextSpan(text: "\n"),
+                          const TextSpan(text: "\n"),
                       ])
                   .toList(),
         ),
@@ -157,7 +157,7 @@ CustomRender listElementRender(
         {Style? style, Widget? child, List<InlineSpan>? children}) =>
     CustomRender.inlineSpan(
       inlineSpan: (context, buildChildren) => WidgetSpan(
-        child: CSSBoxWidget(
+        child: CssBoxWidget(
           key: context.key,
           style: style ?? context.tree.style,
           shrinkWrap: context.parser.shrinkWrap,
@@ -185,8 +185,8 @@ CustomRender listElementRender(
                                   : 0.0),
                       child:
                           style?.markerContent ?? context.style.markerContent)
-                  : Container(height: 0, width: 0),
-              Text("\u0020",
+                  : const SizedBox(height: 0, width: 0),
+              const Text("\u0020",
                   textAlign: TextAlign.right,
                   style: TextStyle(fontWeight: FontWeight.w400)),
               Expanded(
@@ -206,7 +206,7 @@ CustomRender listElementRender(
                               ? 10.0
                               : 0.0)
                       : EdgeInsets.zero,
-                  child: CSSBoxWidget.withInlineSpanChildren(
+                  child: CssBoxWidget.withInlineSpanChildren(
                     children: _getListElementChildren(
                         style?.listStylePosition ??
                             context.tree.style.listStylePosition,
@@ -220,7 +220,7 @@ CustomRender listElementRender(
                                       alignment: PlaceholderAlignment.middle,
                                       child: style?.markerContent ??
                                           context.style.markerContent ??
-                                          Container(height: 0, width: 0))
+                                          const SizedBox(height: 0, width: 0))
                                 ]
                               : []),
                     style: style ?? context.style,
@@ -370,16 +370,20 @@ CustomRender networkImageRender({
           if (!completer.isCompleted) {
             context.parser.cachedImageSizes[src] = size;
             completer.complete(size);
-            image.image.resolve(ImageConfiguration()).removeListener(listener!);
+            image.image
+                .resolve(const ImageConfiguration())
+                .removeListener(listener!);
           }
         }, onError: (object, stacktrace) {
           if (!completer.isCompleted) {
             completer.completeError(object);
-            image.image.resolve(ImageConfiguration()).removeListener(listener!);
+            image.image
+                .resolve(const ImageConfiguration())
+                .removeListener(listener!);
           }
         });
 
-        image.image.resolve(ImageConfiguration()).addListener(listener);
+        image.image.resolve(const ImageConfiguration()).addListener(listener);
       }
       final attributes =
           context.tree.element!.attributes.cast<String, String>();
@@ -472,7 +476,7 @@ CustomRender verticalAlignRender(
                 key: context.key,
                 offset: Offset(
                     0, verticalOffset ?? _getVerticalOffset(context.tree)),
-                child: CSSBoxWidget.withInlineSpanChildren(
+                child: CssBoxWidget.withInlineSpanChildren(
                   children: children ?? buildChildren.call(),
                   style: context.style,
                 ),
@@ -492,7 +496,7 @@ CustomRender fallbackRender({Style? style, List<InlineSpan>? children}) =>
                             tree.element?.parent?.localName != "td" &&
                             tree.element?.localName != "html" &&
                             tree.element?.localName != "body")
-                          TextSpan(text: "\n"),
+                          const TextSpan(text: "\n"),
                       ])
                   .toList(),
             ));
@@ -517,7 +521,7 @@ List<InlineSpan> _getListElementChildren(
     ListStylePosition? position, Function() buildChildren) {
   List<InlineSpan> children = buildChildren.call();
   if (position == ListStylePosition.INSIDE) {
-    final tabSpan = WidgetSpan(
+    const tabSpan = WidgetSpan(
       child: Text("\t",
           textAlign: TextAlign.right,
           style: TextStyle(fontWeight: FontWeight.w400)),
@@ -567,7 +571,7 @@ InlineSpan _getInteractableChildren(RenderContext context,
 }
 
 final _dataUriFormat = RegExp(
-    "^(?<scheme>data):(?<mime>image\/[\\w\+\-\.]+)(?<encoding>;base64)?\,(?<data>.*)");
+    "^(?<scheme>data):(?<mime>image/[\\w+-.]+)(?<encoding>;base64)?,(?<data>.*)");
 
 double _getVerticalOffset(StyledElement tree) {
   switch (tree.style.verticalAlign) {
@@ -618,5 +622,5 @@ double _aspectRatio(
 
 extension ClampedEdgeInsets on EdgeInsetsGeometry {
   EdgeInsetsGeometry get nonNegative =>
-      this.clamp(EdgeInsets.zero, const EdgeInsets.all(double.infinity));
+      clamp(EdgeInsets.zero, const EdgeInsets.all(double.infinity));
 }
