@@ -1,4 +1,3 @@
-import 'package:flutter_html/src/builtins/image_builtin.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -8,12 +7,7 @@ import 'golden_test.dart';
 
 void main() {
   group("asset uri matcher", () {
-    //TODO replace when ImageMatcherExtension is written
-    matcher(ExtensionContext context) {
-      return context.elementName == "img" &&
-          (context.attributes['src']?.startsWith("asset:") ?? false);
-    }
-
+    CustomRenderMatcher matcher = assetUriMatcher();
     testImgSrcMatcher(
       "matches a full asset: uri",
       matcher,
@@ -46,13 +40,7 @@ void main() {
     );
   });
   group("default network source matcher", () {
-    //TODO replace when ImageMatcherExtension is written
-    matcher(ExtensionContext context) {
-      return context.elementName == "img" &&
-          ((context.attributes['src']?.startsWith("http:") ?? false) ||
-              (context.attributes['src']?.startsWith('https:') ?? false));
-    }
-
+    CustomRenderMatcher matcher = networkSourceMatcher();
     testImgSrcMatcher(
       "matches a full http uri",
       matcher,
@@ -91,40 +79,33 @@ void main() {
     );
   });
   group("custom network source matcher", () {
-    //TODO replace when ImageMatcherExtension is written
-    matcher(ExtensionContext context) {
-      return context.elementName == "img" &&
-          (context.attributes['src']?.startsWith("https://www.google.com") ??
-              false) &&
-          (context.attributes['src']?.endsWith('.png') ?? false);
-    }
-
+    CustomRenderMatcher matcher = networkSourceMatcher(
+      schemas: ['https'],
+      domains: ['www.google.com'],
+      extension: 'png',
+    );
     testImgSrcMatcher(
       "matches schema, domain and extension",
       matcher,
-      imgSrc:
-          'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png',
+      imgSrc: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png',
       shouldMatch: true,
     );
     testImgSrcMatcher(
       "doesn't match if schema is different",
       matcher,
-      imgSrc:
-          'http://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png',
+      imgSrc: 'http://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png',
       shouldMatch: false,
     );
     testImgSrcMatcher(
       "doesn't match if domain is different",
       matcher,
-      imgSrc:
-          'https://google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png',
+      imgSrc: 'https://google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png',
       shouldMatch: false,
     );
     testImgSrcMatcher(
       "doesn't match if file extension is different",
       matcher,
-      imgSrc:
-          'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dppng',
+      imgSrc: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dppng',
       shouldMatch: false,
     );
     testImgSrcMatcher(
@@ -141,14 +122,7 @@ void main() {
     );
   });
   group("default (base64) image data uri matcher", () {
-    //TODO replace when ImageMatcherExtension is written
-    matcher(ExtensionContext context) {
-      return context.elementName == "img" &&
-          ImageBuiltIn.dataUriFormat
-                  .firstMatch(context.attributes['src'] ?? "") !=
-              null;
-    }
-
+    CustomRenderMatcher matcher = dataUriMatcher();
     testImgSrcMatcher(
       "matches a full png base64 data uri",
       matcher,
@@ -205,14 +179,14 @@ void main() {
 
 String _fakeElement(String? src) {
   return """
-      <img alt ='' src="$src" />
+      <img src="$src" />
     """;
 }
 
 @isTest
 void testImgSrcMatcher(
   String name,
-  bool Function(ExtensionContext) matcher, {
+  CustomRenderMatcher matcher, {
   required String? imgSrc,
   required bool shouldMatch,
 }) {
@@ -221,18 +195,16 @@ void testImgSrcMatcher(
       TestApp(
         Html(
           data: _fakeElement(imgSrc),
-          extensions: [
-            MatcherExtension(
-              matcher: matcher,
-              builder: (_) => const Text("Success"),
+          customRenders: {
+            matcher: CustomRender.widget(
+              widget: (RenderContext context, _) {
+                return Text("Success");
+              },
             ),
-          ],
+          },
         ),
       ),
     );
-    await expectLater(
-      find.text("Success"),
-      shouldMatch ? findsOneWidget : findsNothing,
-    );
+    await expectLater(find.text("Success"), shouldMatch ? findsOneWidget : findsNothing);
   });
 }

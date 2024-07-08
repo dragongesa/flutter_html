@@ -4,27 +4,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_html/flutter_html.dart';
 
-class CssBoxWidget extends StatelessWidget {
-  const CssBoxWidget({
-    super.key,
+class CSSBoxWidget extends StatelessWidget {
+  CSSBoxWidget({
+    this.key,
     required this.child,
     required this.style,
     this.textDirection,
     this.childIsReplaced = false,
     this.shrinkWrap = false,
-    this.top = false,
-  });
+  }) : super(key: key);
 
   /// Generates a CSSBoxWidget that contains a list of InlineSpan children.
-  CssBoxWidget.withInlineSpanChildren({
-    super.key,
+  CSSBoxWidget.withInlineSpanChildren({
+    this.key,
     required List<InlineSpan> children,
     required this.style,
     this.textDirection,
     this.childIsReplaced = false,
     this.shrinkWrap = false,
-    this.top = false,
-  }) : child = _generateWidgetChild(children, style);
+    bool selectable = false,
+    TextSelectionControls? selectionControls,
+    ScrollPhysics? scrollPhysics,
+  })  : this.child = selectable
+            ? _generateSelectableWidgetChild(
+                children,
+                style,
+                selectionControls,
+                scrollPhysics,
+              )
+            : _generateWidgetChild(children, style),
+        super(key: key);
+
+  /// An optional anchor key to use in finding this box
+  final AnchorKey? key;
 
   /// The child to be rendered within the CSS Box.
   final Widget child;
@@ -47,46 +59,28 @@ class CssBoxWidget extends StatelessWidget {
   /// necessarily take up the full available width unless necessary
   final bool shrinkWrap;
 
-  /// For the root widget, so textScaleFactor, etc are only applied once
-  final bool top;
-
   @override
   Widget build(BuildContext context) {
-    final markerBox = style.listStylePosition == ListStylePosition.outside
-        ? _generateMarkerBoxSpan(style)
-        : null;
-
-    final direction = _checkTextDirection(context, textDirection);
-    final padding = style.padding?.resolve(direction);
-
     return _CSSBoxRenderer(
       width: style.width ?? Width.auto(),
       height: style.height ?? Height.auto(),
-      paddingSize: padding?.collapsedSize ?? Size.zero,
+      paddingSize: style.padding?.collapsedSize ?? Size.zero,
       borderSize: style.border?.dimensions.collapsedSize ?? Size.zero,
       margins: style.margin ?? Margins.zero,
-      display: style.display ?? Display.inline,
+      display: style.display ?? Display.INLINE,
       childIsReplaced: childIsReplaced,
       emValue: _calculateEmValue(style, context),
-      textDirection: direction,
+      textDirection: _checkTextDirection(context, textDirection),
       shrinkWrap: shrinkWrap,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            border: style.border,
-            color: style.backgroundColor, //Colors the padding and content boxes
-          ),
-          width: _shouldExpandToFillBlock() ? double.infinity : null,
-          padding: padding,
-          child: top
-              ? child
-              : MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                  child: child,
-                ),
+      child: Container(
+        decoration: BoxDecoration(
+          border: style.border,
+          color: style.backgroundColor, //Colors the padding and content boxes
         ),
-        if (markerBox != null) Text.rich(markerBox),
-      ],
+        width: _shouldExpandToFillBlock() ? double.infinity : null,
+        padding: style.padding ?? EdgeInsets.zero,
+        child: child,
+      ),
     );
   }
 
@@ -97,70 +91,49 @@ class CssBoxWidget extends StatelessWidget {
       return Container();
     }
 
-    // Generate an inline marker box if the list-style-position is set to
-    // inside. Otherwise the marker box will be added elsewhere.
-    if (style.listStylePosition == ListStylePosition.inside) {
-      final inlineMarkerBox = _generateMarkerBoxSpan(style);
-      if (inlineMarkerBox != null) {
-        children.insert(0, inlineMarkerBox);
-      }
-    }
-
     return Text.rich(
       TextSpan(
         style: style.generateTextStyle(),
         children: children,
       ),
-      textAlign: style.textAlign ?? TextAlign.start,
+      style: style.generateTextStyle(),
+      textAlign: style.textAlign,
       textDirection: style.direction,
       maxLines: style.maxLines,
-      overflow: style.textOverflow ?? TextOverflow.clip,
+      overflow: style.textOverflow,
     );
   }
 
-  static InlineSpan? _generateMarkerBoxSpan(Style style) {
-    if (style.display == Display.listItem) {
-      // First handle listStyleImage
-      if (style.listStyleImage != null) {
-        return WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Image.network(
-            style.listStyleImage!.uriText,
-            errorBuilder: (_, __, ___) {
-              if (style.marker?.content.replacementContent?.isNotEmpty ??
-                  false) {
-                return Text.rich(
-                  TextSpan(
-                    text: style.marker!.content.replacementContent!,
-                    style: style.marker!.style?.generateTextStyle(),
-                  ),
-                );
-              }
-
-              return Container();
-            },
-          ),
-        );
-      }
-
-      // Display list marker with given style
-      if (style.marker?.content.replacementContent?.isNotEmpty ?? false) {
-        return TextSpan(
-          text: style.marker!.content.replacementContent!,
-          style: style.marker!.style?.generateTextStyle(),
-        );
-      }
+  static Widget _generateSelectableWidgetChild(
+    List<InlineSpan> children,
+    Style style,
+    TextSelectionControls? selectionControls,
+    ScrollPhysics? scrollPhysics,
+  ) {
+    if (children.isEmpty) {
+      return Container();
     }
 
-    return null;
+    return SelectableText.rich(
+      TextSpan(
+        style: style.generateTextStyle(),
+        children: children,
+      ),
+      style: style.generateTextStyle(),
+      textAlign: style.textAlign,
+      textDirection: style.direction,
+      maxLines: style.maxLines,
+      selectionControls: selectionControls,
+      scrollPhysics: scrollPhysics,
+    );
   }
 
   /// Whether or not the content-box should expand its width to fill the
   /// width available to it or if it should just let its inner content
   /// determine the content-box's width.
   bool _shouldExpandToFillBlock() {
-    return (style.display == Display.block ||
-            style.display == Display.listItem) &&
+    return (style.display == Display.BLOCK ||
+            style.display == Display.LIST_ITEM) &&
         !childIsReplaced &&
         !shrinkWrap;
   }
@@ -181,7 +154,7 @@ class CssBoxWidget extends StatelessWidget {
 class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
   _CSSBoxRenderer({
     Key? key,
-    required super.children,
+    required Widget child,
     required this.display,
     required this.margins,
     required this.width,
@@ -192,7 +165,7 @@ class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
     required this.childIsReplaced,
     required this.emValue,
     required this.shrinkWrap,
-  }) : super(key: key);
+  }) : super(key: key, children: [child]);
 
   /// The Display type of the element
   final Display display;
@@ -227,8 +200,8 @@ class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
   final bool shrinkWrap;
 
   @override
-  RenderCSSBox createRenderObject(BuildContext context) {
-    return RenderCSSBox(
+  _RenderCSSBox createRenderObject(BuildContext context) {
+    return _RenderCSSBox(
       display: display,
       width: width..normalize(emValue),
       height: height..normalize(emValue),
@@ -242,7 +215,7 @@ class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderCSSBox renderObject) {
+  void updateRenderObject(BuildContext context, _RenderCSSBox renderObject) {
     renderObject
       ..display = display
       ..width = (width..normalize(emValue))
@@ -256,21 +229,10 @@ class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
   }
 
   Margins _preProcessMargins(Margins margins, bool shrinkWrap) {
-    late Margin leftMargin;
-    late Margin rightMargin;
-    Margin topMargin = margins.top ?? margins.blockStart ?? Margin.zero();
-    Margin bottomMargin = margins.bottom ?? margins.blockEnd ?? Margin.zero();
-
-    switch (textDirection) {
-      case TextDirection.rtl:
-        leftMargin = margins.left ?? margins.inlineEnd ?? Margin.zero();
-        rightMargin = margins.right ?? margins.inlineStart ?? Margin.zero();
-        break;
-      case TextDirection.ltr:
-        leftMargin = margins.left ?? margins.inlineStart ?? Margin.zero();
-        rightMargin = margins.right ?? margins.inlineEnd ?? Margin.zero();
-        break;
-    }
+    Margin leftMargin = margins.left ?? Margin.zero();
+    Margin rightMargin = margins.right ?? Margin.zero();
+    Margin topMargin = margins.top ?? Margin.zero();
+    Margin bottomMargin = margins.bottom ?? Margin.zero();
 
     //Preprocess margins to a pixel value
     leftMargin.normalize(emValue);
@@ -282,7 +244,7 @@ class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
     // and https://drafts.csswg.org/css2/#inline-replaced-width
     // and https://drafts.csswg.org/css2/#inlineblock-width
     // and https://drafts.csswg.org/css2/#inlineblock-replaced-width
-    if (display == Display.inline || display == Display.inlineBlock) {
+    if (display == Display.INLINE || display == Display.INLINE_BLOCK) {
       if (margins.left?.unit == Unit.auto) {
         leftMargin = Margin.zero();
       }
@@ -309,14 +271,12 @@ class _CSSBoxRenderer extends MultiChildRenderObjectWidget {
   }
 }
 
-@visibleForTesting
-
 /// Implements the CSS layout algorithm
-class RenderCSSBox extends RenderBox
+class _RenderCSSBox extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, CSSBoxParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, CSSBoxParentData> {
-  RenderCSSBox({
+  _RenderCSSBox({
     required Display display,
     required Width width,
     required Height height,
@@ -419,9 +379,8 @@ class RenderCSSBox extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! CSSBoxParentData) {
+    if (child.parentData is! CSSBoxParentData)
       child.parentData = CSSBoxParentData();
-    }
   }
 
   static double getIntrinsicDimension(RenderBox? firstChild,
@@ -486,31 +445,25 @@ class RenderCSSBox extends RenderBox
     double width = containingBlockSize.width;
     double height = containingBlockSize.height;
 
-    assert(firstChild != null);
-    RenderBox child = firstChild!;
-
-    final CSSBoxParentData parentData = child.parentData! as CSSBoxParentData;
-    RenderBox? markerBoxChild = parentData.nextSibling;
+    RenderBox? child = firstChild;
+    assert(child != null);
 
     // Calculate child size
     final childConstraints = constraints.copyWith(
       maxWidth: (this.width.unit != Unit.auto)
           ? this.width.value
           : containingBlockSize.width -
-              (margins.left?.value ?? 0) -
-              (margins.right?.value ?? 0),
+              (this.margins.left?.value ?? 0) -
+              (this.margins.right?.value ?? 0),
       maxHeight: (this.height.unit != Unit.auto)
           ? this.height.value
           : containingBlockSize.height -
-              (margins.top?.value ?? 0) -
-              (margins.bottom?.value ?? 0),
+              (this.margins.top?.value ?? 0) -
+              (this.margins.bottom?.value ?? 0),
       minWidth: (this.width.unit != Unit.auto) ? this.width.value : 0,
       minHeight: (this.height.unit != Unit.auto) ? this.height.value : 0,
     );
-    final Size childSize = layoutChild(child, childConstraints);
-    if (markerBoxChild != null) {
-      layoutChild(markerBoxChild, childConstraints);
-    }
+    final Size childSize = layoutChild(child!, childConstraints);
 
     // Calculate used values of margins based on rules
     final usedMargins = _calculateUsedMargins(childSize, containingBlockSize);
@@ -522,27 +475,27 @@ class RenderCSSBox extends RenderBox
     //Calculate Width and Height of CSS Box
     height = childSize.height;
     switch (display) {
-      case Display.block:
+      case Display.BLOCK:
         width = (shrinkWrap || childIsReplaced)
             ? childSize.width + horizontalMargins
             : containingBlockSize.width;
         height = childSize.height + verticalMargins;
         break;
-      case Display.inline:
+      case Display.INLINE:
         width = childSize.width + horizontalMargins;
         height = childSize.height;
         break;
-      case Display.inlineBlock:
+      case Display.INLINE_BLOCK:
         width = childSize.width + horizontalMargins;
         height = childSize.height + verticalMargins;
         break;
-      case Display.listItem:
+      case Display.LIST_ITEM:
         width = shrinkWrap
             ? childSize.width + horizontalMargins
             : containingBlockSize.width;
         height = childSize.height + verticalMargins;
         break;
-      case Display.none:
+      case Display.NONE:
         width = 0;
         height = 0;
         break;
@@ -561,68 +514,43 @@ class RenderCSSBox extends RenderBox
     );
     size = sizes.parentSize;
 
-    assert(firstChild != null);
-    RenderBox child = firstChild!;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final CSSBoxParentData childParentData =
+          child.parentData! as CSSBoxParentData;
 
-    final CSSBoxParentData childParentData =
-        child.parentData! as CSSBoxParentData;
+      // Calculate used margins based on constraints and child size
+      final usedMargins =
+          _calculateUsedMargins(sizes.childSize, constraints.biggest);
+      final leftMargin = usedMargins.left?.value ?? 0;
+      final topMargin = usedMargins.top?.value ?? 0;
 
-    // Calculate used margins based on constraints and child size
-    final usedMargins =
-        _calculateUsedMargins(sizes.childSize, constraints.biggest);
-    final leftMargin = usedMargins.left?.value ?? 0;
-    final topMargin = usedMargins.top?.value ?? 0;
-
-    double leftOffset = 0;
-    double topOffset = 0;
-    switch (display) {
-      case Display.block:
-        leftOffset = leftMargin;
-        topOffset = topMargin;
-        break;
-      case Display.inline:
-        leftOffset = leftMargin;
-        break;
-      case Display.inlineBlock:
-        leftOffset = leftMargin;
-        topOffset = topMargin;
-        break;
-      case Display.listItem:
-        leftOffset = leftMargin;
-        topOffset = topMargin;
-        break;
-      case Display.none:
-        //No offset
-        break;
-    }
-    childParentData.offset = Offset(leftOffset, topOffset);
-    assert(child.parentData == childParentData);
-
-    // Now, layout the marker box if it exists:
-    RenderBox? markerBox = childParentData.nextSibling;
-    if (markerBox != null) {
-      final markerBoxParentData = markerBox.parentData! as CSSBoxParentData;
-      final distance = (child.getDistanceToBaseline(TextBaseline.alphabetic,
-                  onlyReal: true) ??
-              0) +
-          topOffset;
-      final offsetHeight = distance -
-          (markerBox.getDistanceToBaseline(TextBaseline.alphabetic) ??
-              markerBox.size.height);
-      switch (_textDirection) {
-        case TextDirection.rtl:
-          markerBoxParentData.offset = Offset(
-            child.size.width,
-            offsetHeight,
-          );
+      double leftOffset = 0;
+      double topOffset = 0;
+      switch (display) {
+        case Display.BLOCK:
+          leftOffset = leftMargin;
+          topOffset = topMargin;
           break;
-        case TextDirection.ltr:
-          markerBoxParentData.offset = Offset(
-            -markerBox.size.width,
-            offsetHeight,
-          );
+        case Display.INLINE:
+          leftOffset = leftMargin;
+          break;
+        case Display.INLINE_BLOCK:
+          leftOffset = leftMargin;
+          topOffset = topMargin;
+          break;
+        case Display.LIST_ITEM:
+          leftOffset = leftMargin;
+          topOffset = topMargin;
+          break;
+        case Display.NONE:
+          //No offset
           break;
       }
+      childParentData.offset = Offset(leftOffset, topOffset);
+
+      assert(child.parentData == childParentData);
+      child = childParentData.nextSibling;
     }
   }
 
@@ -640,7 +568,7 @@ class RenderCSSBox extends RenderBox
     bool marginLeftIsAuto = marginLeft.unit == Unit.auto;
     bool marginRightIsAuto = marginRight.unit == Unit.auto;
 
-    if (display == Display.block) {
+    if (display == Display.BLOCK) {
       if (childIsReplaced) {
         widthIsAuto = false;
       }
@@ -730,11 +658,10 @@ class RenderCSSBox extends RenderBox
     }
 
     return Margins(
-      left: marginLeft,
-      right: marginRight,
-      top: margins.top,
-      bottom: margins.bottom,
-    );
+        left: marginLeft,
+        right: marginRight,
+        top: margins.top,
+        bottom: margins.bottom);
   }
 
   @override
@@ -746,18 +673,19 @@ class RenderCSSBox extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     defaultPaint(context, offset);
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }
 
 extension Normalize on Dimension {
   void normalize(double emValue) {
-    switch (unit) {
-      case Unit.rem:
-      // Because CSSBoxWidget doesn't have any information about any
-      // sort of tree structure, treat rem the same as em. The HtmlParser
-      // widget handles rem/em values before they get to CSSBoxWidget.
+    switch (this.unit) {
       case Unit.em:
-        value *= emValue;
-        unit = Unit.px;
+        this.value *= emValue;
+        this.unit = Unit.px;
         return;
       case Unit.px:
       case Unit.auto:
@@ -768,6 +696,7 @@ extension Normalize on Dimension {
 }
 
 double _calculateEmValue(Style style, BuildContext buildContext) {
+  //TODO is there a better value for this?
   return (style.fontSize?.emValue ?? 16) *
       MediaQuery.textScaleFactorOf(buildContext) *
       MediaQuery.of(buildContext).devicePixelRatio;

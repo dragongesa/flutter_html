@@ -6,12 +6,10 @@ import 'package:flutter_html/src/css_parser.dart';
 
 //Export Style value-unit APIs
 export 'package:flutter_html/src/style/margin.dart';
-export 'package:flutter_html/src/style/padding.dart';
 export 'package:flutter_html/src/style/length.dart';
 export 'package:flutter_html/src/style/size.dart';
 export 'package:flutter_html/src/style/fontsize.dart';
 export 'package:flutter_html/src/style/lineheight.dart';
-export 'package:flutter_html/src/style/marker.dart';
 
 ///This class represents all the available CSS attributes
 ///for this package.
@@ -19,7 +17,7 @@ class Style {
   /// CSS attribute "`background-color`"
   ///
   /// Inherited: no,
-  /// Default: null (transparent),
+  /// Default: Colors.transparent,
   Color? backgroundColor;
 
   /// CSS attribute "`color`"
@@ -27,18 +25,6 @@ class Style {
   /// Inherited: yes,
   /// Default: unspecified,
   Color? color;
-
-  /// CSS attribute "`counter-increment`"
-  ///
-  /// Inherited: no
-  /// Initial: none
-  Map<String, int?>? counterIncrement;
-
-  /// CSS attribute "`counter-reset`"
-  ///
-  /// Inherited: no
-  /// Initial: none
-  Map<String, int?>? counterReset;
 
   /// CSS attribute "`direction`"
   ///
@@ -100,16 +86,10 @@ class Style {
   /// Default: normal (0),
   double? letterSpacing;
 
-  /// CSS attribute "`list-style-image`"
-  ///
-  /// Inherited: yes,
-  /// Default: TODO
-  ListStyleImage? listStyleImage;
-
   /// CSS attribute "`list-style-type`"
   ///
   /// Inherited: yes,
-  /// Default: ListStyleType.disc
+  /// Default: ListStyleType.DISC
   ListStyleType? listStyleType;
 
   /// CSS attribute "`list-style-position`"
@@ -118,23 +98,17 @@ class Style {
   /// Default: ListStylePosition.OUTSIDE
   ListStylePosition? listStylePosition;
 
-  /// CSS pseudo-element "`::marker`"
+  /// CSS attribute "`padding`"
   ///
   /// Inherited: no,
-  /// Default: null
-  Marker? marker;
+  /// Default: EdgeInsets.zero
+  EdgeInsets? padding;
 
   /// CSS attribute "`margin`"
   ///
   /// Inherited: no,
-  /// Default: Margins.zero
+  /// Default: EdgeInsets.zero
   Margins? margin;
-
-  /// CSS attribute "`padding`"
-  ///
-  /// Inherited: no,
-  /// Default: HtmlPaddings.zero
-  HtmlPaddings? padding;
 
   /// CSS attribute "`text-align`"
   ///
@@ -178,8 +152,8 @@ class Style {
   /// CSS attribute "`vertical-align`"
   ///
   /// Inherited: no,
-  /// Default: VerticalAlign.baseline,
-  VerticalAlign verticalAlign;
+  /// Default: VerticalAlign.BASELINE,
+  VerticalAlign? verticalAlign;
 
   /// CSS attribute "`white-space`"
   ///
@@ -214,6 +188,7 @@ class Style {
   String? after;
   Border? border;
   Alignment? alignment;
+  Widget? markerContent;
 
   /// MaxLine
   ///
@@ -232,10 +207,8 @@ class Style {
   TextTransform? textTransform;
 
   Style({
-    this.backgroundColor,
+    this.backgroundColor = Colors.transparent,
     this.color,
-    this.counterIncrement,
-    this.counterReset,
     this.direction,
     this.display,
     this.fontFamily,
@@ -247,11 +220,9 @@ class Style {
     this.height,
     this.lineHeight,
     this.letterSpacing,
-    this.listStyleImage,
     this.listStyleType,
     this.listStylePosition,
     this.padding,
-    this.marker,
     this.margin,
     this.textAlign,
     this.textDecoration,
@@ -259,7 +230,7 @@ class Style {
     this.textDecorationStyle,
     this.textDecorationThickness,
     this.textShadow,
-    this.verticalAlign = VerticalAlign.baseline,
+    this.verticalAlign,
     this.whiteSpace,
     this.width,
     this.wordSpacing,
@@ -267,24 +238,25 @@ class Style {
     this.after,
     this.border,
     this.alignment,
+    this.markerContent,
     this.maxLines,
     this.textOverflow,
     this.textTransform = TextTransform.none,
   }) {
-    if (alignment == null &&
-        (display == Display.block || display == Display.listItem)) {
-      alignment = Alignment.centerLeft;
+    if (this.alignment == null &&
+        (display == Display.BLOCK || display == Display.LIST_ITEM)) {
+      this.alignment = Alignment.centerLeft;
     }
   }
 
   static Map<String, Style> fromThemeData(ThemeData theme) => {
-        'h1': Style.fromTextStyle(theme.textTheme.displayLarge!),
-        'h2': Style.fromTextStyle(theme.textTheme.displayMedium!),
-        'h3': Style.fromTextStyle(theme.textTheme.displaySmall!),
-        'h4': Style.fromTextStyle(theme.textTheme.headlineMedium!),
-        'h5': Style.fromTextStyle(theme.textTheme.headlineSmall!),
-        'h6': Style.fromTextStyle(theme.textTheme.titleLarge!),
-        'body': Style.fromTextStyle(theme.textTheme.bodyMedium!),
+        'h1': Style.fromTextStyle(theme.textTheme.headline1!),
+        'h2': Style.fromTextStyle(theme.textTheme.headline2!),
+        'h3': Style.fromTextStyle(theme.textTheme.headline3!),
+        'h4': Style.fromTextStyle(theme.textTheme.headline4!),
+        'h5': Style.fromTextStyle(theme.textTheme.headline5!),
+        'h6': Style.fromTextStyle(theme.textTheme.headline6!),
+        'body': Style.fromTextStyle(theme.textTheme.bodyText2!),
       };
 
   static Map<String, Style> fromCss(
@@ -315,6 +287,8 @@ class Style {
       shadows: textShadow,
       wordSpacing: wordSpacing,
       height: lineHeight?.size ?? 1.0,
+      //TODO background
+      //TODO textBaseline
     );
   }
 
@@ -327,8 +301,6 @@ class Style {
     return copyWith(
       backgroundColor: other.backgroundColor,
       color: other.color,
-      counterIncrement: other.counterIncrement,
-      counterReset: other.counterReset,
       direction: other.direction,
       display: other.display,
       fontFamily: other.fontFamily,
@@ -340,12 +312,12 @@ class Style {
       height: other.height,
       lineHeight: other.lineHeight,
       letterSpacing: other.letterSpacing,
-      listStyleImage: other.listStyleImage,
       listStyleType: other.listStyleType,
       listStylePosition: other.listStylePosition,
-      padding: padding?.merge(other.padding) ?? other.padding,
-      margin: margin?.merge(other.margin) ?? other.margin,
-      marker: other.marker,
+      padding: other.padding,
+      //TODO merge EdgeInsets
+      margin: other.margin,
+      //TODO merge Margins
       textAlign: other.textAlign,
       textDecoration: other.textDecoration,
       textDecorationColor: other.textDecorationColor,
@@ -356,10 +328,13 @@ class Style {
       whiteSpace: other.whiteSpace,
       width: other.width,
       wordSpacing: other.wordSpacing,
+
       before: other.before,
       after: other.after,
-      border: border?.merge(other.border) ?? other.border,
+      border: other.border,
+      //TODO merge border
       alignment: other.alignment,
+      markerContent: other.markerContent,
       maxLines: other.maxLines,
       textOverflow: other.textOverflow,
       textTransform: other.textTransform,
@@ -383,7 +358,7 @@ class Style {
           : backgroundColor,
       color: child.color ?? color,
       direction: child.direction ?? direction,
-      display: display == Display.none ? display : child.display,
+      display: display == Display.NONE ? display : child.display,
       fontFamily: child.fontFamily ?? fontFamily,
       fontFamilyFallback: child.fontFamilyFallback ?? fontFamilyFallback,
       fontFeatureSettings: child.fontFeatureSettings ?? fontFeatureSettings,
@@ -392,7 +367,6 @@ class Style {
       fontWeight: child.fontWeight ?? fontWeight,
       lineHeight: finalLineHeight,
       letterSpacing: child.letterSpacing ?? letterSpacing,
-      listStyleImage: child.listStyleImage ?? listStyleImage,
       listStyleType: child.listStyleType ?? listStyleType,
       listStylePosition: child.listStylePosition ?? listStylePosition,
       textAlign: child.textAlign ?? textAlign,
@@ -412,8 +386,6 @@ class Style {
   Style copyWith({
     Color? backgroundColor,
     Color? color,
-    Map<String, int?>? counterIncrement,
-    Map<String, int?>? counterReset,
     TextDirection? direction,
     Display? display,
     String? fontFamily,
@@ -425,12 +397,10 @@ class Style {
     Height? height,
     LineHeight? lineHeight,
     double? letterSpacing,
-    ListStyleImage? listStyleImage,
     ListStyleType? listStyleType,
     ListStylePosition? listStylePosition,
-    HtmlPaddings? padding,
+    EdgeInsets? padding,
     Margins? margin,
-    Marker? marker,
     TextAlign? textAlign,
     TextDecoration? textDecoration,
     Color? textDecorationColor,
@@ -454,8 +424,6 @@ class Style {
     return Style(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       color: color ?? this.color,
-      counterIncrement: counterIncrement ?? this.counterIncrement,
-      counterReset: counterReset ?? this.counterReset,
       direction: direction ?? this.direction,
       display: display ?? this.display,
       fontFamily: fontFamily ?? this.fontFamily,
@@ -467,12 +435,10 @@ class Style {
       height: height ?? this.height,
       lineHeight: lineHeight ?? this.lineHeight,
       letterSpacing: letterSpacing ?? this.letterSpacing,
-      listStyleImage: listStyleImage ?? this.listStyleImage,
       listStyleType: listStyleType ?? this.listStyleType,
       listStylePosition: listStylePosition ?? this.listStylePosition,
       padding: padding ?? this.padding,
       margin: margin ?? this.margin,
-      marker: marker ?? this.marker,
       textAlign: textAlign ?? this.textAlign,
       textDecoration: textDecoration ?? this.textDecoration,
       textDecorationColor: textDecorationColor ?? this.textDecorationColor,
@@ -488,195 +454,129 @@ class Style {
       after: beforeAfterNull == true ? null : after ?? this.after,
       border: border ?? this.border,
       alignment: alignment ?? this.alignment,
+      markerContent: markerContent ?? this.markerContent,
       maxLines: maxLines ?? this.maxLines,
       textOverflow: textOverflow ?? this.textOverflow,
       textTransform: textTransform ?? this.textTransform,
     );
   }
 
-  factory Style.fromTextStyle(TextStyle textStyle) {
-    return Style(
-      backgroundColor: textStyle.backgroundColor,
-      color: textStyle.color,
-      textDecoration: textStyle.decoration,
-      textDecorationColor: textStyle.decorationColor,
-      textDecorationStyle: textStyle.decorationStyle,
-      textDecorationThickness: textStyle.decorationThickness,
-      fontFamily: textStyle.fontFamily,
-      fontFamilyFallback: textStyle.fontFamilyFallback,
-      fontFeatureSettings: textStyle.fontFeatures,
-      fontSize:
-          textStyle.fontSize != null ? FontSize(textStyle.fontSize!) : null,
-      fontStyle: textStyle.fontStyle,
-      fontWeight: textStyle.fontWeight,
-      letterSpacing: textStyle.letterSpacing,
-      textShadow: textStyle.shadows,
-      wordSpacing: textStyle.wordSpacing,
-      lineHeight: LineHeight(textStyle.height ?? 1.2),
-    );
+  Style.fromTextStyle(TextStyle textStyle) {
+    this.backgroundColor = textStyle.backgroundColor;
+    this.color = textStyle.color;
+    this.textDecoration = textStyle.decoration;
+    this.textDecorationColor = textStyle.decorationColor;
+    this.textDecorationStyle = textStyle.decorationStyle;
+    this.textDecorationThickness = textStyle.decorationThickness;
+    this.fontFamily = textStyle.fontFamily;
+    this.fontFamilyFallback = textStyle.fontFamilyFallback;
+    this.fontFeatureSettings = textStyle.fontFeatures;
+    this.fontSize =
+        textStyle.fontSize != null ? FontSize(textStyle.fontSize!) : null;
+    this.fontStyle = textStyle.fontStyle;
+    this.fontWeight = textStyle.fontWeight;
+    this.letterSpacing = textStyle.letterSpacing;
+    this.textShadow = textStyle.shadows;
+    this.wordSpacing = textStyle.wordSpacing;
+    this.lineHeight = LineHeight(textStyle.height ?? 1.2);
+    this.textTransform = TextTransform.none;
   }
 
   /// Sets any dimensions set to rem or em to the computed size
   void setRelativeValues(double remValue, double emValue) {
-    final calculatedWidth = width?.calculateRelativeValue(remValue, emValue);
-    if (calculatedWidth != null) {
-      width = Width(calculatedWidth);
+    if (width?.unit == Unit.rem) {
+      width = Width(width!.value * remValue);
+    } else if (width?.unit == Unit.em) {
+      width = Width(width!.value * emValue);
     }
 
-    final calculatedHeight = height?.calculateRelativeValue(remValue, emValue);
-    if (calculatedHeight != null) {
-      height = Height(calculatedHeight);
+    if (height?.unit == Unit.rem) {
+      height = Height(height!.value * remValue);
+    } else if (height?.unit == Unit.em) {
+      height = Height(height!.value * emValue);
     }
 
-    final calculatedFontSize =
-        fontSize?.calculateRelativeValue(remValue, emValue);
-    if (calculatedFontSize != null) {
-      fontSize = FontSize(calculatedFontSize);
+    if (fontSize?.unit == Unit.rem) {
+      fontSize = FontSize(fontSize!.value * remValue);
+    } else if (fontSize?.unit == Unit.em) {
+      fontSize = FontSize(fontSize!.value * emValue);
+    }
+
+    Margin? marginLeft;
+    Margin? marginTop;
+    Margin? marginRight;
+    Margin? marginBottom;
+
+    if (margin?.left?.unit == Unit.rem) {
+      marginLeft = Margin(margin!.left!.value * remValue);
+    } else if (margin?.left?.unit == Unit.em) {
+      marginLeft = Margin(margin!.left!.value * emValue);
+    }
+
+    if (margin?.top?.unit == Unit.rem) {
+      marginTop = Margin(margin!.top!.value * remValue);
+    } else if (margin?.top?.unit == Unit.em) {
+      marginTop = Margin(margin!.top!.value * emValue);
+    }
+
+    if (margin?.right?.unit == Unit.rem) {
+      marginRight = Margin(margin!.right!.value * remValue);
+    } else if (margin?.right?.unit == Unit.em) {
+      marginRight = Margin(margin!.right!.value * emValue);
+    }
+
+    if (margin?.bottom?.unit == Unit.rem) {
+      marginBottom = Margin(margin!.bottom!.value * remValue);
+    } else if (margin?.bottom?.unit == Unit.em) {
+      marginBottom = Margin(margin!.bottom!.value * emValue);
     }
 
     margin = margin?.copyWith(
-      left: margin?.left?.getRelativeValue(remValue, emValue),
-      top: margin?.top?.getRelativeValue(remValue, emValue),
-      right: margin?.right?.getRelativeValue(remValue, emValue),
-      bottom: margin?.bottom?.getRelativeValue(remValue, emValue),
-      inlineStart: margin?.inlineStart?.getRelativeValue(remValue, emValue),
-      inlineEnd: margin?.inlineEnd?.getRelativeValue(remValue, emValue),
-      blockStart: margin?.blockStart?.getRelativeValue(remValue, emValue),
-      blockEnd: margin?.blockEnd?.getRelativeValue(remValue, emValue),
-    );
-
-    padding = padding?.copyWith(
-      left: padding?.left?.getRelativeValue(remValue, emValue),
-      top: padding?.top?.getRelativeValue(remValue, emValue),
-      right: padding?.right?.getRelativeValue(remValue, emValue),
-      bottom: padding?.bottom?.getRelativeValue(remValue, emValue),
-      inlineStart: padding?.inlineStart?.getRelativeValue(remValue, emValue),
-      inlineEnd: padding?.inlineEnd?.getRelativeValue(remValue, emValue),
-      blockStart: padding?.blockStart?.getRelativeValue(remValue, emValue),
-      blockEnd: padding?.blockEnd?.getRelativeValue(remValue, emValue),
-    );
-  }
-}
-
-extension _MarginRelativeValues on Margin {
-  Margin? getRelativeValue(double remValue, double emValue) {
-    double? calculatedValue = calculateRelativeValue(remValue, emValue);
-    if (calculatedValue != null) {
-      return Margin(calculatedValue);
-    }
-
-    return null;
-  }
-}
-
-extension _PaddingRelativeValues on HtmlPadding {
-  HtmlPadding? getRelativeValue(double remValue, double emValue) {
-    double? calculatedValue = calculateRelativeValue(remValue, emValue);
-    if (calculatedValue != null) {
-      return HtmlPadding(calculatedValue);
-    }
-
-    return null;
-  }
-}
-
-extension MergeBorders on Border? {
-  Border? merge(Border? other) {
-    return Border(
-      top: other?.top ?? this?.top ?? BorderSide.none,
-      right: other?.right ?? this?.right ?? BorderSide.none,
-      bottom: other?.bottom ?? this?.bottom ?? BorderSide.none,
-      left: other?.left ?? this?.left ?? BorderSide.none,
+      left: marginLeft,
+      top: marginTop,
+      right: marginRight,
+      bottom: marginBottom,
     );
   }
 }
 
 enum Display {
-  block,
-  inline,
-  inlineBlock,
-  listItem,
-  none,
+  BLOCK,
+  INLINE,
+  INLINE_BLOCK,
+  LIST_ITEM,
+  NONE,
 }
 
-enum ListStyleType {
-  arabicIndic('arabic-indic'),
-  armenian('armenian'),
-  lowerArmenian('lower-armenian'),
-  upperArmenian('upper-armenian'),
-  bengali('bengali'),
-  cambodian('cambodian'),
-  khmer('khmer'),
-  circle('circle'),
-  cjkDecimal('cjk-decimal'),
-  cjkEarthlyBranch('cjk-earthly-branch'),
-  cjkHeavenlyStem('cjk-heavenly-stem'),
-  cjkIdeographic('cjk-ideographic'),
-  decimal('decimal'),
-  decimalLeadingZero('decimal-leading-zero'),
-  devanagari('devanagari'),
-  disc('disc'),
-  disclosureClosed('disclosure-closed'),
-  disclosureOpen('disclosure-open'),
-  ethiopicNumeric('ethiopic-numeric'),
-  georgian('georgian'),
-  gujarati('gujarati'),
-  gurmukhi('gurmukhi'),
-  hebrew('hebrew'),
-  hiragana('hiragana'),
-  hiraganaIroha('hiragana-iroha'),
-  japaneseFormal('japanese-formal'),
-  japaneseInformal('japanese-informal'),
-  kannada('kannada'),
-  katakana('katakana'),
-  katakanaIroha('katakana-iroha'),
-  koreanHangulFormal('korean-hangul-formal'),
-  koreanHanjaInformal('korean-hanja-informal'),
-  koreanHanjaFormal('korean-hanja-formal'),
-  lao('lao'),
-  lowerAlpha('lower-alpha'),
-  lowerGreek('lower-greek'),
-  lowerLatin('lower-latin'),
-  lowerRoman('lower-roman'),
-  malayalam('malayalam'),
-  mongolian('mongolian'),
-  myanmar('myanmar'),
-  none('none'),
-  oriya('oriya'),
-  persian('persian'),
-  simpChineseFormal('simp-chinese-formal'),
-  simpChineseInformal('simp-chinese-informal'),
-  square('square'),
-  tamil('tamil'),
-  telugu('telugu'),
-  thai('thai'),
-  tibetan('tibetan'),
-  tradChineseFormal('trad-chinese-formal'),
-  tradChineseInformal('trad-chinese-informal'),
-  upperAlpha('upper-alpha'),
-  upperLatin('upper-latin'),
-  upperRoman('upper-roman');
+class ListStyleType {
+  final String text;
+  final String type;
+  final Widget? widget;
 
-  final String counterStyle;
+  const ListStyleType(this.text, {this.type = "marker", this.widget});
 
-  const ListStyleType(this.counterStyle);
+  factory ListStyleType.fromImage(String url) =>
+      ListStyleType(url, type: "image");
 
-  factory ListStyleType.fromName(String name) {
-    return ListStyleType.values.firstWhere((value) {
-      return name == value.counterStyle;
-    });
-  }
-}
+  factory ListStyleType.fromWidget(Widget widget) =>
+      ListStyleType("", widget: widget, type: "widget");
 
-class ListStyleImage {
-  final String uriText;
-
-  const ListStyleImage(this.uriText);
+  static const LOWER_ALPHA = ListStyleType("LOWER_ALPHA");
+  static const UPPER_ALPHA = ListStyleType("UPPER_ALPHA");
+  static const LOWER_LATIN = ListStyleType("LOWER_LATIN");
+  static const UPPER_LATIN = ListStyleType("UPPER_LATIN");
+  static const CIRCLE = ListStyleType("CIRCLE");
+  static const DISC = ListStyleType("DISC");
+  static const DECIMAL = ListStyleType("DECIMAL");
+  static const LOWER_ROMAN = ListStyleType("LOWER_ROMAN");
+  static const UPPER_ROMAN = ListStyleType("UPPER_ROMAN");
+  static const SQUARE = ListStyleType("SQUARE");
+  static const NONE = ListStyleType("NONE");
 }
 
 enum ListStylePosition {
-  outside,
-  inside,
+  OUTSIDE,
+  INSIDE,
 }
 
 enum TextTransform {
@@ -687,15 +587,12 @@ enum TextTransform {
 }
 
 enum VerticalAlign {
-  baseline,
-  sub,
-  sup,
-  top,
-  bottom,
-  middle,
+  BASELINE,
+  SUB,
+  SUPER,
 }
 
 enum WhiteSpace {
-  normal,
-  pre,
+  NORMAL,
+  PRE,
 }
